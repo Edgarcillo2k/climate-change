@@ -1,19 +1,15 @@
 <template>
     <b-container>
+        <b-form-select v-model="yearSelected" :options="years" @input="changeYear" required></b-form-select>
         <svg id="svg" :viewBox="`0 0 ${width} ${height}`">
         </svg>
     </b-container>
 </template>
 
-<script src="http://d3js.org/topojson.v1.min.js"></script>
-<script src="http://d3js.org/queue.v1.min.js"></script>
-<script src="https://d3js.org/d3.v4.js"></script>
-<script src="d3-tip.js"></script>
-
 <script lang="ts">
 import Vue from 'vue';
 import * as d3 from 'd3v4';
-import {schemeBlues} from 'd3-scale-chromatic';
+import { interpolateRdYlGn} from 'd3-scale-chromatic';
 import { select } from 'd3';
 import d3Tip from "d3-tip";
 import * as topojson from "topojson-client";
@@ -28,23 +24,35 @@ export default Vue.extend({
             data: undefined,
             svg: undefined as any,
             path: undefined as any,
-            tip: undefined as any
+            tip: undefined as any,
+            years: [],
+            yearSelected: 1990
         }
     },
     methods: {
-        ready(error: any, data: any, population: any) {
-            const populationById = {};
+        changeYear(){
+            this.svg.selectAll('path')
+                .style("fill", (d) => {
+                    if(d.data)
+                        return interpolateRdYlGn(1-d.data[this.yearSelected].color);
+                    return "#FFFFFF"; 
+                })
+        },
+        ready(error: any, data: any, emissions: any) {
+            const emissionsById = {};
 
-            population.forEach( (d) => {
-                populationById[d.code] = +d.pop; 
+            emissions.forEach((d) => {
+                const newObj = {};
+                newObj.emissions = +d['Total GHG emissions excluding LUCF (CAIT)'];
+                newObj.color = +d.color;
+                if(!emissionsById[d.Code])
+                    emissionsById[d.Code] = {};
+                emissionsById[d.Code][d.Year] = newObj;
             });
             data.features.forEach((d) => {
-                d.population = populationById[d.id];
+                if(emissionsById[d.id])
+                    d.data = emissionsById[d.id]
             });
-
-            const color = d3.scaleThreshold()
-                .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
-                .range(schemeBlues[7]);
 
             const tip = this.tip;
 
@@ -54,8 +62,10 @@ export default Vue.extend({
                 .data(data.features)
                 .enter().append("path")
                 .attr("d", this.path)
-                .style("fill", function(d) {
-                    return color(populationById[d.id]); 
+                .style("fill", (d) => {
+                    if(d.data)
+                        return interpolateRdYlGn(1-d.data[this.yearSelected].color);
+                    return "#FFFFFF"; 
                 })
                 .style('stroke', 'white')
                 .style('stroke-width', 1.5)
@@ -88,12 +98,15 @@ export default Vue.extend({
             }
     },
     mounted(){
+        for(let i = 1990; i <= 2016; i++){
+            this.years.push(i);
+        }
         const format = d3.format(",");
         this.tip = d3Tip()
             .attr('class', 'd3-tip')
             .offset([-10, 0])
-            .html(function(d) {
-                return "<strong>Country: </strong><span class='details'>" + d.properties.name + "<br></span>" + "<strong>Population: </strong><span class='details'>" + format(d.population) +"</span>";
+            .html((d) => {
+                return "<strong>Country: </strong><span class='details'>" + d.properties.name + "<br></span>" + "<strong>Emissions: </strong><span class='details'>" + format(d.data[this.yearSelected].emissions) +"</span>";
             });
         const margin = {top: 0, right: 0, bottom: 0, left: 0},
             width = 960 - margin.left - margin.right,
@@ -116,7 +129,7 @@ export default Vue.extend({
 
         d3.queue()
             .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
-            .defer(d3.csv, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv")
+            .defer(d3.csv, "https://raw.githubusercontent.com/Edgarcillo2k/climate-change/master/src/assets/total_ghg_emissions_per_year.csv?token=AKWLPXE2KQ32EG2UZ7F7ZH3BVJL2G")
             .await(this.ready);
         
     }

@@ -129,7 +129,7 @@ export default Vue.extend({
 
         d3.queue()
             .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
-            .defer(d3.csv, "https://raw.githubusercontent.com/Edgarcillo2k/climate-change/master/src/assets/total_ghg_emissions_per_year.csv?token=AKWLPXE2KQ32EG2UZ7F7ZH3BVJL2G")
+            .defer(d3.csv, "https://raw.githubusercontent.com/Edgarcillo2k/climate-change/master/src/assets/total_ghg_emissions_per_year.csv?token=AKWLPXCXXZGMX73VUC6KVNDBVJ3WA")
             .await(this.ready);
         
     }

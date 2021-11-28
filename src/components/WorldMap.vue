@@ -1,8 +1,19 @@
 <template>
     <b-container>
-        <b-form-select v-model="yearSelected" :options="years" @input="changeYear" required></b-form-select>
-        <svg id="svg" :viewBox="`0 0 ${width} ${height}`">
-        </svg>
+        <b-row class="h-100 mt-5">
+            <b-col>
+                <b-form-select id="yearList" v-model="yearSelected" :options="years" @input="changeYear" required></b-form-select>
+                <svg id="svg" :viewBox="`0 500 ${width} ${height/2}`">
+                </svg>
+            </b-col>
+            <b-col cols=2 class="d-flex d-column">
+                <div id="color-scale">
+                    <h6>Emissions<br>quantity</h6>
+                    <div id="legend" class="d-inline-block">
+                </div>
+                </div>
+            </b-col>
+        </b-row>
     </b-container>
 </template>
 
@@ -119,11 +130,66 @@ export default Vue.extend({
             .attr('class', 'map');
 
         this.projection = d3.geoMercator()
-            .scale(250)
+            .scale(150)
             .center([0,20])
             .translate([this.width / 2, this.height / 1.5]);
 
         this.path = d3.geoPath().projection(this.projection);
+
+        //Colorscale bar
+        const vh = this.height/2;
+        const legendHeight = vh*0.7;
+        const legendWidth = 40;
+
+
+        //barra de color
+        const canvas = d3.select("#legend")
+            .style("height", legendHeight + "px")
+            .style("width", legendWidth + "px")
+            .style("position", "relative")
+            .append("canvas")
+            .attr("height", legendHeight - margin.top - margin.bottom)
+            .attr("width", 1)
+            .style("height", (legendHeight - margin.top - margin.bottom) + "px")
+            .style("width", (legendWidth - margin.left - margin.right) + "px")
+            .style("border", "1px solid #000")
+            .style("position", "absolute")
+            .style("top", (margin.top) + "px")
+            .style("left", (margin.left) + "px")
+            .node();
+
+        const ctx = canvas?.getContext("2d");
+
+        //escala de la leyenda
+        const legendScale = d3.scaleLinear(interpolateRdYlGn).range([1,legendHeight - margin.top - margin.bottom]).domain([0, 1]);
+        const n = 256;
+
+        const image = ctx?.createImageData(1, legendHeight - margin.top - margin.bottom);
+        d3.range(legendHeight).forEach((i) => {
+            var c = d3.rgb(interpolateRdYlGn(legendScale.invert(i)));
+            image!.data[4*i] = c.r;
+            image!.data[4*i + 1] = c.g;
+            image!.data[4*i + 2] = c.b;
+            image!.data[4*i + 3] = 255;
+        });
+        ctx?.putImageData(image!, 0, 0);
+
+        //leyenda con escala indicada de 0.1 en 0.1 del 0 al 1.
+        const legendAxis = d3.axisRight(legendScale).tickSize(10).ticks(10);
+        const svg = d3.select("#legend")
+            .append("svg")
+            .attr("height", legendHeight + "px")
+            .attr("width", (legendWidth) + "px")
+            .style("position", "absolute")
+            .style("left", "0px")
+            .style("top", "0px")
+
+        svg
+            .append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + (legendWidth - margin.left - margin.right + 3) + "," + (margin.top) + ")")
+            .call(legendAxis);
+
 
         this.svg.call(this.tip);
 
@@ -136,6 +202,20 @@ export default Vue.extend({
 })
 </script>
 <style>
+
+    #color-scale {
+        height: 50% !important;
+    }
+
+    #yearList {
+        padding: 10px;
+        margin: 10px;
+        width: 10%;
+        background: #FFFFFF;
+        box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
     .names {
         fill: none;
         stroke: #fff;

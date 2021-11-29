@@ -1,9 +1,18 @@
 <template>
     <b-container>
+        <b-row>
+            <h3 class="ml-3 mt-5" id="emissionMap">World map with a color scale according to the emission indices</h3>
+        </b-row>
+        <b-row>
+            <b-col cols="2">
+                <h4 class="mt-3 text-center">Year:</h4>
+                <b-form-select class="w-100" id="yearList" v-model="yearSelected" :options="years" @input="changeYear" required></b-form-select>
+            </b-col>
+        </b-row>
+        
         <b-row class="h-100 mt-5">
             <b-col>
-                <b-form-select id="yearList" v-model="yearSelected" :options="years" @input="changeYear" required></b-form-select>
-                <svg id="svg" :viewBox="`0 500 ${width} ${height/2}`">
+                <svg id="svg" :viewBox="`0 0 ${width} ${height}`">
                 </svg>
             </b-col>
             <b-col cols=2 class="d-flex d-column">
@@ -207,10 +216,15 @@ export default Vue.extend({
         height: 50% !important;
     }
 
+    #emissionMap {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
     #yearList {
         padding: 10px;
         margin: 10px;
-        width: 10%;
+        width: 100%;
         background: #FFFFFF;
         box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.1);
         border-radius: 8px;

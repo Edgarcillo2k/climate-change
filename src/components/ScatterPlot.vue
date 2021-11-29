@@ -1,10 +1,15 @@
 <template>
     <b-container>
         <h2 class="mt-5 mb-5">Dispertion diagram for the precipitation per country</h2>
-        <b-form-select id="yearList" v-model="yearSelected" :options="countries" @input="changeYear" required></b-form-select>
-
-        <svg id="scatter" :viewBox="`0 0 ${width} ${height}`">
-        </svg>
+        <b-row>
+            <b-row>
+                <h4>Country</h4>
+                <b-form-select id="yearList" v-model="yearSelected" :options="countries" @input="changeYear" required></b-form-select>
+            </b-row>
+            <b-row class="mt-5">
+                <svg id="scatter" :viewBox="`0 0 ${width} ${height}`" />
+            </b-row>
+        </b-row>
     </b-container>
 </template>
 
@@ -196,8 +201,6 @@ export default Vue.extend({
 <style>
 
 #yearList {
-    padding: 10px;
-    margin: 10px;
     width: 10%;
     background: #FFFFFF;
     box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.1);

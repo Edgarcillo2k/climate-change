@@ -7,12 +7,12 @@
       <world-map/>
     </b-row>
     <b-row>
-      <b-col>
+      <b-col cols="6">
         <scatter-plot></scatter-plot>
       </b-col>
-    </b-row>
-    <b-row>
-      <line-chart></line-chart>
+      <b-col cols="6">
+        <line-chart></line-chart>
+      </b-col>
     </b-row>
   </b-container>
 </template>

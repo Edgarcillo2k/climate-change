@@ -12,7 +12,7 @@
         
         <b-row class="h-100 mt-5">
             <b-col>
-                <svg id="svg" :viewBox="`0 0 ${width} ${height}`">
+                <svg id="svg" :viewBox="`0 500 ${width} ${height}`">
                 </svg>
             </b-col>
             <b-col cols=2 class="d-flex d-column">

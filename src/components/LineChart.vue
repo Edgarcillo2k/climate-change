@@ -3,7 +3,7 @@
         <b-row>
             <h3 class="ml-3">Line chart of climate change</h3>
         </b-row>
-        <b-row class="h-100">
+        <b-row>
             <h2 class="mt-5 mb-5"></h2>
             <div id="linecharter"></div>
         </b-row>
